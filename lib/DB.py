@@ -6,8 +6,8 @@ except ImportError:
     exit()
 
 HOST = "localhost"
-PORT = 3306
-USER = "rename"
+PORT = 3307
+USER = "root"
 PASS = ""
 DATABASE = "rename"
 
@@ -16,16 +16,19 @@ class DBOP(object):
     """
     MySQL operation class for logging command logs and searching logs
     """
+
     def __init__(self):
         try:
-            self.db = pymysql.connect(HOST, USER, PASS, DATABASE, PORT, charset='utf8')
+            self.db = pymysql.connect(
+                host=HOST, user=USER, password=PASS, database=DATABASE, port=PORT, charset='utf8')
         except pymysql.OperationalError as e:
             print(e)
             exit()
         self.cursor = self.db.cursor()
 
     def __del__(self):
-        self.db.close()
+        if hasattr(self, 'db'):
+            self.db.close()
 
     def get_wuxing_name(self, wuxing_list):
         wuxing_sql = 'SELECT word FROM rn_wuxing WHERE 1 = 2'
@@ -40,7 +43,8 @@ class DBOP(object):
         return name_set
 
     def match_name_word(self, name):
-        name_word_sql = 'SELECT COUNT(1) FROM rn_name_word WHERE word IN ("%s", "%s")' % (name[0], name[1])
+        name_word_sql = 'SELECT COUNT(1) FROM rn_name_word WHERE word IN ("%s", "%s")' % (
+            name[0], name[1])
         self.cursor.execute(name_word_sql)
         match_count = self.cursor.fetchone()
         return True if match_count[0] == 2 else False
